@@ -502,7 +502,7 @@
         },
         {
             "name": "nutgram/nutgram",
-            "version": "*",
+            "version": "4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nutgram/nutgram.git",
