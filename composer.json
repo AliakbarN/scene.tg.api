@@ -5,7 +5,6 @@
     "require": {
         "nutgram/nutgram": "*"
     },
-    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "SceneApi\\": "src"
