@@ -1,7 +1,7 @@
 {
     "name": "aliakbar/scene.tg.api",
     "description": "This is an auxiliary service designed to make it easier and more comfortable to work with the Telegram API (Nutgram).",
-    "type": "composer-plugin",
+    "type": "library",
     "require": {
         "nutgram/nutgram": "^4.2.0"
     },
