@@ -3,7 +3,7 @@
     "description": "This is an auxiliary service designed to make it easier and more comfortable to work with the Telegram API (Nutgram).",
     "type": "composer-plugin",
     "require": {
-        "nutgram/nutgram": "*"
+        "nutgram/nutgram": "^4.2"
     },
     "minimum-stability": "dev",
     "autoload": {
