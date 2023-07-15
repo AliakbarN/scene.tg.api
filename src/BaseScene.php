@@ -2,6 +2,7 @@
 
 namespace SceneApi;
 
+use Exception;
 use SceneApi\Services\SceneEntryHandlerRunner;
 use SergiX44\Nutgram\Nutgram;
 
@@ -58,7 +59,7 @@ abstract class BaseScene
     /**
      * @return void
      * Jump to next scene
-     * @throws \Exception
+     * @throws Exception
      */
     public function next(Nutgram$bot, int $userId, string $sceneName) :void
     {
@@ -96,4 +97,14 @@ abstract class BaseScene
      * Works out when a failure is handled
      */
     public function onFail(Nutgram $bot) :void {}
+
+    protected function setData(array $data, int $userId) :void
+    {
+        $this->manager->setData($data, $userId);
+    }
+
+    protected function getData(string $key, int $userId) :mixed
+    {
+        return $this->manager->getData($key, $userId);
+    }
 }

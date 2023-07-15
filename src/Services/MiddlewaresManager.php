@@ -18,18 +18,14 @@ trait MiddlewaresManager
     /**
      * @throws Exception
      */
-    protected function checkMiddlewares(BaseScene $scene, bool $softWarning = true) :void
+    protected function checkMiddlewares(BaseScene $scene) :void
     {
         $middlewares = $scene->middlewares;
 
         foreach ($middlewares as $middleware)
         {
             if (!is_a($middleware, BaseMiddleware::class, true)) {
-                if ($softWarning) {
-                    var_dump('The class [' . $middleware .'] is not extended by BaseMiddleware');
-                } else {
-                    throw new Exception('The class [' . $middleware .'] is not extended by BaseMiddleware');
-                }
+                $this->log('The class [' . $middleware .'] is not extended by BaseMiddleware');
             }
         }
     }

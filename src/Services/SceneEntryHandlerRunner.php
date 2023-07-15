@@ -15,9 +15,9 @@ trait SceneEntryHandlerRunner
 
     protected function enter(Nutgram $bot) :void
     {
-        $this->onEnter($bot);
-
         $this->manager->addUser($bot->userId(), $this->name, false);
+
+        $this->onEnter($bot);
     }
 
     protected function onCommand(string $command) :void

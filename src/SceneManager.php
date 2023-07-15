@@ -4,6 +4,7 @@ namespace SceneApi;
 
 use SceneApi\BaseScene;
 use SceneApi\Services\BaseMiddleware;
+use SceneApi\Services\GetOption;
 use SceneApi\Services\GetScenes;
 use SceneApi\Services\MiddlewaresManager;
 use SceneApi\Services\ODT\UserState;
@@ -15,6 +16,8 @@ class SceneManager
 
     use MiddlewaresManager;
 
+
+    protected GetOption $option;
 
     /**
      * @var array
@@ -32,13 +35,15 @@ class SceneManager
     /**
      * @var array
      */
-    protected static array $users;
+    protected array $users;
 
     protected Nutgram $bot;
 
-    public function __construct(Nutgram $bot, ?array $scenes = null)
+    public function __construct(Nutgram $bot, ?array $scenes = null, array $options = null)
     {
         $this->bot = $bot;
+
+        $this->option = new GetOption($options);
 
         if ($scenes === null) {
             if (count($this->scenes) === 0) {
@@ -54,13 +59,13 @@ class SceneManager
      */
     public function process() :void
     {
-        $this->checkClasses(false);
+        $this->checkClasses();
 
         foreach ($this->scenes as $key => $scene)
         {
             $this->initiatedScenes[] = new $scene($this->bot, $this);
 
-            $this->checkMiddlewares($this->initiatedScenes[$key], false);
+            $this->checkMiddlewares($this->initiatedScenes[$key]);
 
             $this->initiatedScenes[$key]->runEntryHandler();
         }
@@ -77,23 +82,23 @@ class SceneManager
         {
             $userId = $bot->userId();
 
-            if (!array_key_exists($userId, self::$users) & !self::$users[$userId]->isActive) {
+            if (!array_key_exists($userId, $this->users) & !$this->users[$userId]->isActive) {
                 return;
             }
 
-            $scene = $this->findSceneByName(self::$users[$userId]->sceneName);
+            $scene = $this->findSceneByName($this->users[$userId]->sceneName);
 
             if ($scene === null) {
-                throw new Exception('Something went wrong. /n/r' . $scene .' = null. userId = '. $userId);
+                $this->log('Something went wrong. /n/r' . $scene .' = null. userId = '. $userId, false);
             }
 
-            if (!self::$users[$userId]->isActive) {
+            if (!$this->users[$userId]->isActive) {
                 return;
             }
 
-            if (self::$users[$userId]->isEnter) {
+            if ($this->users[$userId]->isEnter) {
                 $scene->onEnter($bot);
-                self::$users[$userId]->isEnter = false;
+                $this->users[$userId]->isEnter = false;
                 return;
             }
 
@@ -116,16 +121,12 @@ class SceneManager
     /**
      * @throws Exception
      */
-    protected function checkClasses(bool $softWarning = true) :void
+    protected function checkClasses() :void
     {
         foreach ($this->scenes as $scene)
         {
             if (!is_a($scene, BaseScene::class, true)) {
-                if ($softWarning) {
-                    var_dump('The class [' . $scene .'] is not extended by BaseScene');
-                } else {
-                    throw new Exception('The class [' . $scene .'] is not extended by BaseScene');
-                }
+                $this->log('The class [' . $scene .'] is not extended by BaseScene');
             }
         }
     }
@@ -144,30 +145,66 @@ class SceneManager
 
     public function addUser(int $userId, string $sceneName, bool $isEnter) :void
     {
-        self::$users[$userId] = new UserState($sceneName, true, $isEnter);
+        $this->users[$userId] = new UserState($sceneName, true, $isEnter);
     }
 
     public function deleteUser(int $userId) :void
     {
-        unset(self::$users[$userId]);
+        unset($this->users[$userId]);
     }
 
     public function changeUserState(int $userId, bool $state) :void
     {
-        self::$users[$userId]->isActive = $state;
+        $this->users[$userId]->isActive = $state;
     }
 
     public function next(Nutgram $bot, int $userId, string $sceneName) :void
     {
-        self::$users[$userId]->sceneName = $sceneName;
-        self::$users[$userId]->isEnter = false;
+        $this->users[$userId]->sceneName = $sceneName;
+        $this->users[$userId]->isEnter = false;
 
         $scene = $this->findSceneByName($sceneName);
 
         if ($scene === null) {
-            throw new Exception('Something went wrong');
+            $this->log('Something went wrong', false);
         }
 
         $scene->onEnter($bot);
+    }
+
+    public function setData(array $data, int $userId) :void
+    {
+        foreach ($data as $key => $value)
+        {
+            $this->users[$userId]->globalData[$key] = $value;
+        }
+    }
+
+    public function getData(string $key, int $userId) :mixed
+    {
+        if (!array_key_exists($key, $this->users[$userId]->globalData)) {
+            $this->log('The data [' . $key . '] has nor been added yet', true);
+            return null;
+        }
+        return $this->users[$userId]->globalData[$key];
+    }
+
+    function log(string $message, bool $softWarning = null) :void
+    {
+        if ($softWarning !== null) {
+            if ($softWarning) {
+                var_dump($message);
+            } else {
+                throw new Exception($message);
+            }
+
+            return;
+        }
+
+        if (!$this->option->get('soft-warning')) {
+            throw new Exception($message);
+        } else {
+            var_dump($message);
+        }
     }
 }
