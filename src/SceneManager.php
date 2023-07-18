@@ -123,7 +123,11 @@ class SceneManager
 
             if (!$scene->wasMiddlewaresRun) {
                 $breakDownChain = $this->manageMiddlewares($bot, $this->initiateMiddlewares($scene->middlewares));
-                $scene->wasMiddlewaresRun = true;
+
+                if ($this->option->get('runMiddlewaresOnce')) {
+                    $scene->wasMiddlewaresRun = true;
+                }
+
                 if ($breakDownChain) {
                     return;
                 }
