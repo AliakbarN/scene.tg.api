@@ -61,7 +61,7 @@ class SceneManager
      */
     public function process() :void
     {
-        if ($this->checkClasses()) {
+        if (!$this->checkClasses()) {
             return;
         }
 
@@ -116,6 +116,7 @@ class SceneManager
 
             if (!$scene->isSuccess($bot)) {
                 $scene->onFail($bot);
+                return;
             }
 
             $scene->onQuery($bot);
@@ -157,7 +158,7 @@ class SceneManager
         return null;
     }
 
-    protected function generateSceneName(string $sceneClassName) :string
+    public function generateSceneName(string $sceneClassName) :string
     {
         $arr = explode('\\', $sceneClassName);
         $sceneClassName = end($arr);

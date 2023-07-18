@@ -55,6 +55,10 @@ trait MiddlewaresManager
      */
     protected function manageMiddlewares(Nutgram $bot, array $middlewares) :bool
     {
+        if (count($middlewares) === 0) {
+            return;
+        }
+
         $bot->{"customData"} = [];
         $i = 0;
         $allData = [];

@@ -58,6 +58,16 @@ trait SceneEntryHandlerRunner
         }
     }
 
+    protected function checkSceneName() : string
+    {
+        if ($this->name === null) {
+            $this->name = $this->manager->generateSceneName(get_class($this));
+            return $this->name;
+        }
+
+        return $this->name;
+    }
+
     protected function checkEnterCondition() :bool
     {
         if ($this->enterCondition === null) {

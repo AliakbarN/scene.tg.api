@@ -61,10 +61,10 @@ abstract class BaseScene
      * Jump to next scene
      * @throws Exception
      */
-    public function next(Nutgram$bot, int $userId, string $sceneName) :void
+    public function next(Nutgram$bot, string $sceneName) :void
     {
-        $this->manager->next($bot, $userId, $sceneName);
-        $this->manager->changeUserState($userId, true);
+        $this->manager->next($bot, $bot->userId(), $sceneName);
+        $this->manager->changeUserState($bot->userId(), true);
         $this->wasMiddlewaresRun = false;
     }
 
