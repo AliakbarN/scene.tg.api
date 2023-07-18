@@ -67,7 +67,7 @@ class SceneManager
 
         foreach ($this->scenes as $key => $scene)
         {
-            $this->initiatedScenes[] = new $scene($this->bot, $this);
+            $this->initiateSceneClass($scene);
 
             $this->checkMiddlewares($this->initiatedScenes[$key]);
 
@@ -75,6 +75,21 @@ class SceneManager
         }
 
         $this->handle();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function start (Nutgram $bot, mixed $sceneClassName) :void
+    {
+        if (!$this->checkClasses(true, $sceneClassName)) {
+            return;
+        }
+
+        $scene = $this->initiateSceneClass($sceneClassName, true);
+
+        $this->addUser($bot->userId(), $scene->name, false);
+        $scene->onEnter($bot);
     }
 
     /**
@@ -124,10 +139,53 @@ class SceneManager
     }
 
     /**
+     * @param mixed $className
+     * @param bool $getResult
+     * @return \SceneApi\BaseScene
+     */
+    protected function initiateSceneClass(mixed $className, bool $getResult = false) :BaseScene
+    {
+        $newInitiatedScene = new $className($this->bot, $this);
+
+        if ($newInitiatedScene->name === null) {
+            $newInitiatedScene->name = $this->generateSceneName(get_class($newInitiatedScene));
+        }
+
+        $flag = true;
+
+        foreach ($this->initiatedScenes as $initiatedScene)
+        {
+            if ($initiatedScene->name === $newInitiatedScene->name) {
+                $flag = false;
+            }
+        }
+
+        if ($flag) {
+            $this->initiatedScenes[] = $newInitiatedScene;
+        }
+
+        if ($getResult) {
+            return $newInitiatedScene;
+        }
+    }
+
+    /**
      * @throws Exception
      */
-    protected function checkClasses() :bool
+    protected function checkClasses(bool $onlyOne = false, string $sceneName = null) :bool
     {
+        if ($onlyOne) {
+            if ($sceneName === null) {
+                $this->log('className argument missed in checkClass', false);
+            } else {
+                if (!is_a($sceneName, BaseScene::class, true)) {
+                    $this->log('The class [' . $sceneName .'] is not extended by BaseScene');
+                } else {
+                    return true;
+                }
+            }
+        }
+
         foreach ($this->scenes as $scene)
         {
             if (!is_a($scene, BaseScene::class, true)) {
@@ -141,6 +199,7 @@ class SceneManager
 
         return true;
     }
+
 
     protected function findSceneByName(string $sceneName) :BaseScene|null
     {
