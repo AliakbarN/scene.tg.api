@@ -47,7 +47,9 @@ class SceneManager
 
         if ($scenes === null) {
             if (count($this->scenes) === 0) {
-                $this->scenes = GetScenes::getSceneClasses(__DIR__ . '/../', 'App/Services');
+                if ($this->option->get('sceneNameSpace') & $this->option->get('scenesDirPath')) {
+                    $this->scenes = GetScenes::getSceneClasses($this->option->get('scenesDirPath'), $this->option->get('sceneNameSpace'));
+                }
             }
         } else {
             $this->scenes = $scenes;
@@ -59,7 +61,9 @@ class SceneManager
      */
     public function process() :void
     {
-        $this->checkClasses();
+        if ($this->checkClasses()) {
+            return;
+        }
 
         foreach ($this->scenes as $key => $scene)
         {
@@ -121,7 +125,7 @@ class SceneManager
     /**
      * @throws Exception
      */
-    protected function checkClasses() :void
+    protected function checkClasses() :bool
     {
         foreach ($this->scenes as $scene)
         {
@@ -129,18 +133,34 @@ class SceneManager
                 $this->log('The class [' . $scene .'] is not extended by BaseScene');
             }
         }
+
+        if (count($this->scenes) === 0) {
+            return false;
+        }
+
+        return true;
     }
 
     protected function findSceneByName(string $sceneName) :BaseScene|null
     {
         foreach ($this->initiatedScenes as $scene)
         {
+            if ($scene->name === null) {
+                $scene->name = $this->generateSceneName($scene::class);
+            }
+
             if ($scene->name === $sceneName) {
                 return $scene;
             }
         }
 
         return null;
+    }
+
+    protected function generateSceneName(string $sceneClassName) :string
+    {
+        $sceneClassName[0] = strtolower($sceneClassName[0]);
+        return $sceneClassName;
     }
 
     public function addUser(int $userId, string $sceneName, bool $isEnter) :void

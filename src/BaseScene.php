@@ -31,13 +31,13 @@ abstract class BaseScene
     public bool $wasMiddlewaresRun = false;
 
     /**
-     * @var string
+     * @var string|null
      * Conditions for entering into scene
      * Available options: command, text
      *
      * @example 'command=start'
      */
-    public string $enterCondition;
+    public string|null $enterCondition = null;
 
 
     public function __construct(Nutgram $bot, SceneManager $manager)

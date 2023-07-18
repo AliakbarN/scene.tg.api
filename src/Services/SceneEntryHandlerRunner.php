@@ -41,7 +41,10 @@ trait SceneEntryHandlerRunner
      */
     public function runEntryHandler() :void
     {
-        $this->checkEnterCondition();
+        if (!$this->checkEnterCondition()) {
+            return;
+        }
+
         [$handler, $condition] = explode('=', $this->enterCondition);
         $this->handlerDistributor($condition, $handler);
     }
@@ -55,8 +58,12 @@ trait SceneEntryHandlerRunner
         }
     }
 
-    protected function checkEnterCondition() :void
+    protected function checkEnterCondition() :bool
     {
+        if ($this->enterCondition === null) {
+            return false;
+        }
+
         $flag = false;
         foreach ($this->availableEnterConditions as $condition)
         {
@@ -68,5 +75,7 @@ trait SceneEntryHandlerRunner
         if (!$flag) {
             throw new Exception('The entryCondition [' . $this->enterCondition . '] is incorrect');
         }
+
+        return true;
     }
 }
