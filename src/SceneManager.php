@@ -159,6 +159,8 @@ class SceneManager
 
     protected function generateSceneName(string $sceneClassName) :string
     {
+        $arr = explode('\\', $sceneClassName);
+        $sceneClassName = end($arr);
         $sceneClassName[0] = strtolower($sceneClassName[0]);
         return $sceneClassName;
     }
@@ -186,7 +188,7 @@ class SceneManager
         $scene = $this->findSceneByName($sceneName);
 
         if ($scene === null) {
-            $this->log('Something went wrong', false);
+            $this->log('Something went wrong. The problem might be caused by incorrect scene name', false);
         }
 
         $scene->onEnter($bot);
