@@ -30,7 +30,9 @@ class SceneManager
     /**
      * @var BaseScene[]
      */
-    protected array $initiatedScenes;
+    protected array $initiatedScenes = [
+
+    ];
 
     /**
      * @var array
@@ -128,7 +130,7 @@ class SceneManager
                     $scene->wasMiddlewaresRun = true;
                 }
 
-                if ($breakDownChain) {
+                if ($breakDownChain === true) {
                     return;
                 }
             }
@@ -145,9 +147,9 @@ class SceneManager
     /**
      * @param mixed $className
      * @param bool $getResult
-     * @return \SceneApi\BaseScene
+     * @return \SceneApi\BaseScene|null
      */
-    protected function initiateSceneClass(mixed $className, bool $getResult = false) :BaseScene
+    protected function initiateSceneClass(mixed $className, bool $getResult = false) :BaseScene|null
     {
         $newInitiatedScene = new $className($this->bot, $this);
 
@@ -171,6 +173,8 @@ class SceneManager
         if ($getResult) {
             return $newInitiatedScene;
         }
+
+        return null;
     }
 
     /**
