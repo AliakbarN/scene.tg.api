@@ -72,7 +72,7 @@ abstract class BaseScene
      * @return void
      * Works out when condition works
      */
-    public function onEnter(Nutgram $bot) : void {}
+    abstract public function onEnter(Nutgram $bot) : void;
 
     /**
      * @param Nutgram $bot
@@ -80,7 +80,7 @@ abstract class BaseScene
      *
      * Works out when user sends a request
      */
-    public function onQuery(Nutgram $bot) :void {}
+    abstract public function onQuery(Nutgram $bot) :void;
 
     /**
      * @param Nutgram $bot
@@ -96,7 +96,9 @@ abstract class BaseScene
      *
      * Works out when a failure is handled
      */
-    public function onFail(Nutgram $bot) :void {}
+    abstract public function onFail(Nutgram $bot) :void;
+
+    abstract public function onSuccess(Nutgram $bot) :void;
 
     protected function setData(array $data, int $userId) :void
     {

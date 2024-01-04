@@ -141,6 +141,7 @@ class SceneManager
             }
 
             $scene->onQuery($bot);
+            $scene->onSuccess($bot);
         });
     }
 
