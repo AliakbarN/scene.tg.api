@@ -10,7 +10,8 @@ trait SceneEntryHandlerRunner
 {
     protected array $availableEnterConditions = [
         'command',
-        'text'
+        'text',
+        'callBackQuery'
     ];
 
     protected function enter(Nutgram $bot) :void
@@ -23,6 +24,14 @@ trait SceneEntryHandlerRunner
     protected function onCommand(string $command) :void
     {
         $this->bot->onCommand($command, function (Nutgram $bot)
+        {
+            $this->enter($bot);
+        });
+    }
+
+    protected function onCallBackQuery(string $pattern) :void
+    {
+        $this->bot->onCallbackQueryData($pattern, function (Nutgram $bot)
         {
             $this->enter($bot);
         });
@@ -55,6 +64,8 @@ trait SceneEntryHandlerRunner
             $this->onCommand($condition);
         } else if ($handler === 'text') {
             $this->onText($condition);
+        } else if ($handler === 'callBackQuery') {
+            $this->onCallBackQuery($condition);
         }
     }
 

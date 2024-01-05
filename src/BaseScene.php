@@ -36,6 +36,10 @@ abstract class BaseScene
      * Available options: command, text
      *
      * @example 'command=start'
+     *
+     * command
+     * text
+     * callBackQuery
      */
     public string|null $enterCondition = null;
 
