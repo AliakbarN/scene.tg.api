@@ -141,6 +141,7 @@ class SceneManager
             }
 
             $scene->onQuery($bot);
+            $scene->onSuccess($bot);
         });
     }
 
@@ -279,6 +280,9 @@ class SceneManager
         return $this->users[$userId]->globalData[$key];
     }
 
+    /**
+     * @throws Exception
+     */
     function log(string $message, bool $softWarning = null) :void
     {
         if ($softWarning !== null) {
