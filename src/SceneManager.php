@@ -3,6 +3,7 @@
 namespace SceneApi;
 
 use SceneApi\BaseScene;
+use SceneApi\Services\BaseInlineKeyboardsScene;
 use SceneApi\Services\BaseMiddleware;
 use SceneApi\Services\GetOption;
 use SceneApi\Services\GetScenes;
@@ -101,48 +102,63 @@ class SceneManager
     {
         $this->bot->onMessage(function (Nutgram $bot)
         {
-            $userId = $bot->userId();
-
-            if (!array_key_exists($userId, $this->users) & !$this->users[$userId]->isActive) {
-                return;
-            }
-
-            $scene = $this->findSceneByName($this->users[$userId]->sceneName);
-
-            if ($scene === null) {
-                $this->log('Something went wrong. /n/r' . $scene .' = null. userId = '. $userId, false);
-            }
-
-            if (!$this->users[$userId]->isActive) {
-                return;
-            }
-
-            if ($this->users[$userId]->isEnter) {
-                $scene->onEnter($bot);
-                $this->users[$userId]->isEnter = false;
-                return;
-            }
-
-            if (!$scene->wasMiddlewaresRun) {
-                $breakDownChain = $this->manageMiddlewares($bot, $this->initiateMiddlewares($scene->middlewares));
-
-                if ($this->option->get('runMiddlewaresOnce')) {
-                    $scene->wasMiddlewaresRun = true;
-                }
-
-                if ($breakDownChain === true) {
-                    return;
-                }
-            }
-
-            if (!$scene->isSuccess($bot)) {
-                $scene->onFail($bot);
-                return;
-            }
-
-            $scene->onQuery($bot);
-            $scene->onSuccess($bot);
+            $this->baseHandler($bot);
         });
+
+        $this->bot->onCallbackQuery(function (Nutgram $bot)
+        {
+            $this->baseHandler($bot);
+        });
+    }
+
+    private function baseHandler(Nutgram $bot, array $options = null) :void
+    {
+        $userId = $bot->userId();
+
+        if (!array_key_exists($userId, $this->users) & !$this->users[$userId]->isActive) {
+            return;
+        }
+
+        $scene = $this->findSceneByName($this->users[$userId]->sceneName);
+
+        if ($scene === null) {
+            $this->log('Something went wrong. /n/r' . $scene .' = null. userId = '. $userId, false);
+        }
+
+        if (!$this->users[$userId]->isActive) {
+            return;
+        }
+
+        if ($this->users[$userId]->isEnter) {
+            $scene->onEnter($bot);
+            $this->users[$userId]->isEnter = false;
+            return;
+        }
+
+        if (!$scene->wasMiddlewaresRun) {
+            $breakDownChain = $this->manageMiddlewares($bot, $this->initiateMiddlewares($scene->middlewares));
+
+            if ($this->option->get('runMiddlewaresOnce')) {
+                $scene->wasMiddlewaresRun = true;
+            }
+
+            if ($breakDownChain === true) {
+                return;
+            }
+        }
+
+        if (!$scene->isSuccess($bot)) {
+            $scene->onFail($bot);
+
+            if ($scene->isDurable) {
+                $scene->onEnter($bot);
+            }
+
+            return;
+        }
+
+        $scene->onQuery($bot);
+        $scene->onSuccess($bot);
     }
 
     /**

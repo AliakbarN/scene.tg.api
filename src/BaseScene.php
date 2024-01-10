@@ -3,10 +3,11 @@
 namespace SceneApi;
 
 use Exception;
+use SceneApi\Services\IScene;
 use SceneApi\Services\SceneEntryHandlerRunner;
 use SergiX44\Nutgram\Nutgram;
 
-abstract class BaseScene
+abstract class BaseScene implements IScene
 {
     use SceneEntryHandlerRunner;
 
@@ -24,9 +25,10 @@ abstract class BaseScene
      * @var array
      * Middlewares for only this class
      */
-    public array $middlewares = [
+    public array $middlewares = [];
 
-    ];
+    public bool $isDurable = false;
+    public bool $isTemporary = false;
 
     public bool $wasMiddlewaresRun = false;
 
@@ -41,7 +43,7 @@ abstract class BaseScene
      * text
      * callBackQuery
      */
-    public string|null $enterCondition = null;
+    public ?string $enterCondition = null;
 
 
     public function __construct(Nutgram $bot, SceneManager $manager)
@@ -73,36 +75,12 @@ abstract class BaseScene
     }
 
     /**
-     * @return void
-     * Works out when condition works
-     */
-    abstract public function onEnter(Nutgram $bot) : void;
-
-    /**
-     * @param Nutgram $bot
-     * @return void
-     *
-     * Works out when user sends a request
-     */
-    abstract public function onQuery(Nutgram $bot) :void;
-
-    /**
      * @param Nutgram $bot
      * @return bool
      */
     public function isSuccess(Nutgram $bot) :bool {
         return true;
     }
-
-    /**
-     * @param Nutgram $bot
-     * @return void
-     *
-     * Works out when a failure is handled
-     */
-    abstract public function onFail(Nutgram $bot) :void;
-
-    abstract public function onSuccess(Nutgram $bot) :void;
 
     protected function setData(array $data, int $userId) :void
     {
